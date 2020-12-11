@@ -1,0 +1,41 @@
+.side-content {
+    min-height: 300px;
+    padding: 10px;
+}
+
+.indigo-color {
+    background-color: #6f42c1;
+    color: white;
+}
+
+.pink-color {
+    background-color: #e83e8c;
+    color: white;
+}
+
+.account-card {
+    width: 350px;
+    padding: 10px !important;
+}
+
+.card {
+    margin: 0px 0px 10px 0px !important;
+    flex: content;
+    padding: 18px;
+}
+
+.card:hover {
+    border: #673ab7 2px solid;
+}
+
+.card-selected {
+    border: #673ab7 2px solid;
+}
+
+.card-deselected {
+    border: none;
+}
+
+.card-button {
+    float: right;
+}
