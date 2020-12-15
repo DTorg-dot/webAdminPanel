@@ -1,5 +1,6 @@
-import { AccountService } from './services/account.service';
+import { PowerToFlyService } from './services/power-to-fly.service';
 import { AccountPowerToFly } from './modelsForService/AccountPowerToFly';
+import { AccountStatus } from './modelsForService/AccountPowerToFly';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -39,7 +40,6 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
   ],
   providers: [
     {provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: {hasBackdrop: false}},
-    AccountService
   ],
   entryComponents: [
     AddNewAccountDialogComponent

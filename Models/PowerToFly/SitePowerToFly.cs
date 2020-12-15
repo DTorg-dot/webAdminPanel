@@ -6,10 +6,8 @@ using WebAdminPanel.Models.Base;
 
 namespace WebAdminPanel.Models.PowerToFly
 {
-    public class JobPowerToFly : JobBase
+    public class SitePowerToFly : Site
     {
-        public int SignalId { get; set; }
-
-        public BotSignalPowerToFly Signal { get; set; }
+        public ICollection<AccountPowerToFly> Accounts { get; set; }
     }
 }

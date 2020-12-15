@@ -9,7 +9,7 @@ using WebAdminPanel.Models;
 namespace WebAdminPanel.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20201211091434_InitializeDB")]
+    [Migration("20201214192711_InitializeDB")]
     partial class InitializeDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,17 +37,12 @@ namespace WebAdminPanel.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
-                    b.Property<int>("SiteId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SiteId");
-
-                    b.ToTable("AccountBase");
+                    b.ToTable("Accounts");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("AccountBase");
                 });
@@ -58,9 +53,6 @@ namespace WebAdminPanel.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("CoverLetter")
                         .HasColumnType("text");
@@ -77,9 +69,7 @@ namespace WebAdminPanel.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("JobBase");
+                    b.ToTable("Jobs");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("JobBase");
                 });
@@ -91,12 +81,18 @@ namespace WebAdminPanel.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Sites");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Site");
                 });
 
             modelBuilder.Entity("WebAdminPanel.Models.BotSignal", b =>
@@ -106,13 +102,14 @@ namespace WebAdminPanel.Migrations
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("BotTypeSignal")
                         .HasColumnType("integer");
 
                     b.Property<string>("CoverrLetter")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IgnoreAlreadySended")
@@ -121,24 +118,24 @@ namespace WebAdminPanel.Migrations
                     b.Property<string>("JobLinks")
                         .HasColumnType("text");
 
-                    b.Property<int>("SiteId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("SiteId");
-
                     b.ToTable("BotSignals");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("BotSignal");
                 });
 
             modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.AccountPowerToFly", b =>
                 {
                     b.HasBaseType("WebAdminPanel.Models.Base.AccountBase");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("SiteId");
 
                     b.HasDiscriminator().HasValue("AccountPowerToFly");
                 });
@@ -147,12 +144,36 @@ namespace WebAdminPanel.Migrations
                 {
                     b.HasBaseType("WebAdminPanel.Models.Base.JobBase");
 
+                    b.Property<int>("SignalId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("SignalId");
+
                     b.HasDiscriminator().HasValue("JobPowerToFly");
                 });
 
-            modelBuilder.Entity("WebAdminPanel.Models.Base.AccountBase", b =>
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.SitePowerToFly", b =>
                 {
-                    b.HasOne("WebAdminPanel.Models.Base.Site", "Site")
+                    b.HasBaseType("WebAdminPanel.Models.Base.Site");
+
+                    b.HasDiscriminator().HasValue("SitePowerToFly");
+                });
+
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.BotSignalPowerToFly", b =>
+                {
+                    b.HasBaseType("WebAdminPanel.Models.BotSignal");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasDiscriminator().HasValue("BotSignalPowerToFly");
+                });
+
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.AccountPowerToFly", b =>
+                {
+                    b.HasOne("WebAdminPanel.Models.PowerToFly.SitePowerToFly", "Site")
                         .WithMany("Accounts")
                         .HasForeignKey("SiteId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -161,10 +182,21 @@ namespace WebAdminPanel.Migrations
                     b.Navigation("Site");
                 });
 
-            modelBuilder.Entity("WebAdminPanel.Models.Base.JobBase", b =>
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.JobPowerToFly", b =>
                 {
-                    b.HasOne("WebAdminPanel.Models.Base.AccountBase", "Account")
+                    b.HasOne("WebAdminPanel.Models.PowerToFly.BotSignalPowerToFly", "Signal")
                         .WithMany("Jobs")
+                        .HasForeignKey("SignalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Signal");
+                });
+
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.BotSignalPowerToFly", b =>
+                {
+                    b.HasOne("WebAdminPanel.Models.PowerToFly.AccountPowerToFly", "Account")
+                        .WithMany("Signals")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -172,33 +204,19 @@ namespace WebAdminPanel.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("WebAdminPanel.Models.BotSignal", b =>
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.AccountPowerToFly", b =>
                 {
-                    b.HasOne("WebAdminPanel.Models.Base.AccountBase", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebAdminPanel.Models.Base.Site", "Site")
-                        .WithMany()
-                        .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("Site");
+                    b.Navigation("Signals");
                 });
 
-            modelBuilder.Entity("WebAdminPanel.Models.Base.AccountBase", b =>
-                {
-                    b.Navigation("Jobs");
-                });
-
-            modelBuilder.Entity("WebAdminPanel.Models.Base.Site", b =>
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.SitePowerToFly", b =>
                 {
                     b.Navigation("Accounts");
+                });
+
+            modelBuilder.Entity("WebAdminPanel.Models.PowerToFly.BotSignalPowerToFly", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

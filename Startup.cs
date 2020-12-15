@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Linq;
 using WebAdminPanel.Models;
 
 namespace WebAdminPanel
@@ -37,6 +38,9 @@ namespace WebAdminPanel
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            // Seed data to DB 
+            services.AddScoped<DbInitializer>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -49,7 +53,7 @@ namespace WebAdminPanel
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, DbInitializer initializer, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -91,12 +95,14 @@ namespace WebAdminPanel
                 }
             });
 
+            initializer.Initialize().Wait();
+
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger", "My API V1");
             });
-        }
+        }  
     }
 }

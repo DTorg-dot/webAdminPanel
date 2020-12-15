@@ -24,14 +24,6 @@ namespace WebAdminPanel.Models
 
         public string CoverrLetter { get; set; }
 
-        public int AccountId { get; set; }
-
-        public AccountBase Account { get; set; }
-
-        public int SiteId { get; set; }
-
-        public Site Site { get; set; }
-
         public BotTypeSignal BotTypeSignal { get; set; }
 
         /// <summary>

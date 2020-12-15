@@ -13,12 +13,24 @@ namespace WebAdminPanel.Models
         public DatabaseContext(DbContextOptions<DatabaseContext> options): base(options)
         { }
 
-        public DbSet<AccountPowerToFly> AccountsPowerToFly { get; set; }
+        #region BaseTables
+        public DbSet<AccountBase> Accounts { get; set; }
 
-        public DbSet<JobPowerToFly> JobsPowerToFly { get; set; }
+        public DbSet<JobBase> Jobs { get; set; }
 
         public DbSet<Site> Sites { get; set; }
 
         public DbSet<BotSignal> BotSignals { get; set; }
+        #endregion
+
+        #region PowerToFly
+        public DbSet<AccountPowerToFly> AccountsPowerToFly { get; set; }
+
+        public DbSet<JobPowerToFly> JobsPowerToFly { get; set; }
+
+        public DbSet<SitePowerToFly> SitePowerToFly { get; set; }
+
+        public DbSet<BotSignalPowerToFly> BotSignalsPowerToFly { get; set; }
+        #endregion
     }
 }

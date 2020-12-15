@@ -8,24 +8,24 @@ import { Account } from 'src/models/Account';
 @Injectable({
   providedIn: 'root',
 })
-export class AccountService {
+export class PowerToFlyService {
 
   constructor(private http: HttpClient) { }
 
-  api_link: any = 'http://localhost:54379/api/';
+  api_link: any = 'http://localhost:54379/api/Powertofly/';
 
   getAccounts(): Observable<any>
   {
-     return this.http.get<any>(this.api_link + 'Account/Accounts');
+     return this.http.get<any>(this.api_link + 'Accounts');
   }
 
   addAccount(account: AccountPowerToFly)
   {
-    return this.http.post(this.api_link + 'Account/AddAccount', account);
+    return this.http.post(this.api_link + 'AddAccount', account);
   }
 
   addParseByJobLinksSignal(coverLetter: string, email: string, jobLinks: string, ignoreAlreadySended: boolean)
   {
-      this.http.post(this.api_link + 'JobPowerToFly/ParseByLinks', { coverLetter, AccountEmail: email, jobLinks, ignoreAlreadySended }).subscribe(x => console.log('success'));
+      this.http.post(this.api_link + 'ParseByLinks', { coverLetter, AccountEmail: email, jobLinks, ignoreAlreadySended }).subscribe(x => console.log('success'));
   }
 }

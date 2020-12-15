@@ -1,5 +1,5 @@
-import { AccountService } from './services/account.service';
-import { AccountPowerToFly } from './modelsForService/AccountPowerToFly';
+import { PowerToFlyService } from './services/power-to-fly.service';
+import { AccountPowerToFly, AccountStatus } from './modelsForService/AccountPowerToFly';
 import { AddNewAccountDialogComponent } from './add-new-account-dialog/add-new-account-dialog.component';
 import { Component, OnInit } from '@angular/core';
 import { Account } from '../models/Account';
@@ -22,13 +22,16 @@ export class AppComponent implements OnInit {
     jobLinksPowerToFly = '';
     checkBoxIgnore = false;
 
-  constructor(public dialog: MatDialog, public accountService: AccountService, private _snackBar: MatSnackBar) {}
+  constructor(public dialog: MatDialog, public powertToFlyService: PowerToFlyService, private _snackBar: MatSnackBar) {}
 
 
   ngOnInit(): void {
-      this.accountService.getAccounts().subscribe(result => 
+      this.powertToFlyService.getAccounts().subscribe(result => 
         { 
-          result.map(x => this.arrayOfAccount.push(new Account(x['email'], x['password'], false)));
+          result.map(x =>  {
+            let status = this.getStatusEnumValue(x['status']);
+            this.arrayOfAccount.push(new Account(x['email'], x['password'], false, status))
+          });
         });
   }
 
@@ -40,8 +43,11 @@ export class AppComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       const accountForSave: AccountPowerToFly = { Email: result.login,  Password: result.password, Status: 1, Id: 1, SiteId: 1};
-      this.accountService.addAccount(accountForSave).subscribe(x =>
-        { this.arrayOfAccount.push({ Email: result.login, Password: result.password,  IsSelected: false})})
+      this.powertToFlyService.addAccount(accountForSave).subscribe(x =>
+        { 
+          let status = this.getStatusEnumValue(x['status']);
+          this.arrayOfAccount.push({ Email: result.login, Password: result.password,  IsSelected: false, Status: status})
+        })
       // TODO: Need to call server and save acc
     });
   }
@@ -70,6 +76,26 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    this.accountService.addParseByJobLinksSignal(this.coverLetterPowerToFly,selectedAccount.Email, this.jobLinksPowerToFly, this.checkBoxIgnore);
+    this.powertToFlyService.addParseByJobLinksSignal(this.coverLetterPowerToFly,selectedAccount.Email, this.jobLinksPowerToFly, this.checkBoxIgnore);
+  }
+
+  getStatusEnumValue(number: number) : AccountStatus
+  {
+    let stauts;
+    switch (number) {
+      case number: 1
+      stauts = AccountStatus[number];
+        break;
+      case number: 2
+      stauts = AccountStatus[number];
+        break;
+      case number: 3
+      stauts = AccountStatus[number];
+        break;
+      default:
+        break;
+    }
+
+    return stauts;
   }
 }

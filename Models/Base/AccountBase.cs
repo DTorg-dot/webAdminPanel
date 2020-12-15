@@ -12,11 +12,5 @@ namespace WebAdminPanel.Models.Base
         public string Password { get; set; }
 
         public AccountStatus Status { get; set; }
-
-        public int SiteId { get; set; }
-
-        public Site Site { get; set; }
-
-        public ICollection<JobBase> Jobs { get; set; }
     }
 }

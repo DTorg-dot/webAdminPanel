@@ -1,8 +1,8 @@
-enum AccountStatus
+export enum AccountStatus
 {
-    Waiting = 1,
+    Available = 1,
     Working = 2,
-    Restart = 3
+    Restart = 3 
 }
 
 export class AccountPowerToFly

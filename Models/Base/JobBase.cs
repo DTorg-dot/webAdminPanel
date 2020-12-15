@@ -14,9 +14,5 @@ namespace WebAdminPanel.Models.Base
         public string Link { get; set; }
 
         public string CoverLetter { get; set; }
-
-        public int AccountId { get; set; }
-
-        public AccountBase Account { get; set; }
     }
 }

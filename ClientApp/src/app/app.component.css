@@ -39,3 +39,15 @@
 .card-button {
     float: right;
 }
+
+.working-status {
+    color:#ffc107;
+}
+
+.avialable-status {
+    color: #28a745;
+}
+
+.status {
+    float: right;
+}
