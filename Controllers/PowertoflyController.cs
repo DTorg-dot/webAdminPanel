@@ -96,6 +96,11 @@ namespace WebAdminPanel.Controllers
             }
 
             var botSignal = Context.BotSignalsPowerToFly.Include(x => x.Account).FirstOrDefault(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.Waiting);
+            if (botSignal == null)
+            {
+                return new BadRequestObjectResult(new string("Bot Signal not found"));
+            }
+
             var account = botSignal.Account;
 
             account.Status = Models.Enum.AccountStatus.Working;

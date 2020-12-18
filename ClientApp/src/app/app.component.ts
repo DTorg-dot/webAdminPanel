@@ -45,7 +45,7 @@ export class AppComponent implements OnInit {
       const accountForSave: AccountPowerToFly = { Email: result.login,  Password: result.password, Status: 1, Id: 1, SiteId: 1};
       this.powertToFlyService.addAccount(accountForSave).subscribe(x =>
         { 
-          let status = this.getStatusEnumValue(x['status']);
+          let status = this.getStatusEnumValue(1);
           this.arrayOfAccount.push({ Email: result.login, Password: result.password,  IsSelected: false, Status: status})
         })
       // TODO: Need to call server and save acc
