@@ -23,6 +23,10 @@
             </mat-form-field>
           </div>
           <button mat-button class="indigo-color" (click)="startParseByLinks()">Start</button>
+          <div>
+            <span *ngIf="allJobsPowerToFly > 0"> All jobs: {{allJobsPowerToFly}}  </span>
+            <span *ngIf="allJobsPowerToFly > 0"> Passed jobs: {{donePowertofly}}  </span>
+          </div>
       </mat-drawer-content>
     </mat-drawer-container>
   </mat-tab>

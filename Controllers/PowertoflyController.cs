@@ -82,7 +82,7 @@ namespace WebAdminPanel.Controllers
             Context.BotSignalsPowerToFly.Add(botSignals);
             await Context.SaveChangesAsync();
 
-            return new OkObjectResult(new string("Signal created"));
+            return new OkObjectResult(new { Message = "Bot signal created" });
         }
 
         [HttpGet("BotSignal")]
@@ -122,11 +122,44 @@ namespace WebAdminPanel.Controllers
             return new OkObjectResult(signal);
         }
 
+        [HttpGet("Status")]
+        public async Task<IActionResult> GetStatus()
+        {
+            var site = Context.Sites.First(x => x.Name == SiteName);
+
+            if (site == null)
+            {
+                return new BadRequestObjectResult(new string("Site not found"));
+            }
+
+            var botSignal = await Context.BotSignalsPowerToFly.Include(x => x.Account).FirstOrDefaultAsync(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.InProgress);
+            if (botSignal == null)
+            {
+                return new BadRequestObjectResult(new string("Bot Signal not found"));
+            }
+
+            var doneJobsCount = await Context.JobsPowerToFly.Where(x => x.SignalId == botSignal.Id).CountAsync();
+
+            return new OkObjectResult(new Status
+            {
+                AllCount = botSignal.JobLinks.Split(';').Where(x => !string.IsNullOrEmpty(x)).Count(),
+                DoneCount = doneJobsCount
+            });
+        }
+
         [HttpGet("ChangeStatus")]
         public async Task ChangeAccountStatus([FromQuery]string email, [FromQuery]string status)
         {
             var account = await Context.AccountsPowerToFly.FirstAsync(x => x.Email == email);
             account.Status = (AccountStatus)Convert.ToInt32(status);
+            await Context.SaveChangesAsync();
+        }
+
+        [HttpPost("ChangeSignalStatus")]
+        public async Task FinishBotSignalStatus([FromQuery]int botSignalId, [FromQuery] BotSignalStatus status)
+        {
+            var botSignal = await Context.BotSignalsPowerToFly.FirstAsync(x => x.Id == botSignalId);
+            botSignal.Status = status;
             await Context.SaveChangesAsync();
         }
 
@@ -201,5 +234,13 @@ namespace WebAdminPanel.Controllers
 
             public int SignalId { get; set; }
         }
+
+        public class Status
+        {
+            public int DoneCount { get; set; }
+
+            public int AllCount { get; set; }
+        }
+
     }
 }

@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { PowerToFlyService } from './services/power-to-fly.service';
 import { AccountPowerToFly, AccountStatus } from './modelsForService/AccountPowerToFly';
 import { AddNewAccountDialogComponent } from './add-new-account-dialog/add-new-account-dialog.component';
@@ -21,17 +22,24 @@ export class AppComponent implements OnInit {
     coverLetterPowerToFly = '';
     jobLinksPowerToFly = '';
     checkBoxIgnore = false;
+    donePowertofly: any;
+    allJobsPowerToFly: any;
 
   constructor(public dialog: MatDialog, public powertToFlyService: PowerToFlyService, private _snackBar: MatSnackBar) {}
 
 
   ngOnInit(): void {
-      this.powertToFlyService.getAccounts().subscribe(result => 
+    this.powertToFlyService.getAccounts().subscribe(result => 
+      { 
+        result.map(x =>  {
+          let status = this.getStatusEnumValue(x['status']);
+          this.arrayOfAccount.push(new Account(x['email'], x['password'], false, status))
+        });
+      });
+      this.powertToFlyService.getStatus().subscribe(result => 
         { 
-          result.map(x =>  {
-            let status = this.getStatusEnumValue(x['status']);
-            this.arrayOfAccount.push(new Account(x['email'], x['password'], false, status))
-          });
+          this.allJobsPowerToFly = result['allCount'];
+          this.donePowertofly = result['doneCount'];
         });
   }
 
@@ -76,7 +84,11 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    this.powertToFlyService.addParseByJobLinksSignal(this.coverLetterPowerToFly,selectedAccount.Email, this.jobLinksPowerToFly, this.checkBoxIgnore);
+    this.powertToFlyService.addParseByJobLinksSignal(this.coverLetterPowerToFly,selectedAccount.Email, this.jobLinksPowerToFly, this.checkBoxIgnore).subscribe(_=> {
+      this._snackBar.open('Bot signal created', null, {
+        duration: 2000,
+      });
+    });
   }
 
   getStatusEnumValue(number: number) : AccountStatus
