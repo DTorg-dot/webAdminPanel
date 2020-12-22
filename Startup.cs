@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.IO;
 using System.Linq;
 using WebAdminPanel.Models;
 
@@ -39,6 +40,24 @@ namespace WebAdminPanel
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder
+                    //Allow host access from any source
+                    //Todo: the new CORS middleware has blocked allowing any origin, that is, setting allowanyorigin will not take effect
+                    //AllowAnyOrigin()
+                    //Set the domain allowed to access
+                    //Todo: Currently, there are bugs in. Net core 3.1, which can be temporarily solved by setisoriginallowed
+                    //.WithOrigins(Configuration["CorsConfig:Origin"])
+                    .SetIsOriginAllowed(t => true)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+                });
+            });
+
             // Seed data to DB 
             services.AddScoped<DbInitializer>();
 
@@ -67,8 +86,9 @@ namespace WebAdminPanel
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
+
             if (!env.IsDevelopment())
             {
                 app.UseSpaStaticFiles();
@@ -80,6 +100,8 @@ namespace WebAdminPanel
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
