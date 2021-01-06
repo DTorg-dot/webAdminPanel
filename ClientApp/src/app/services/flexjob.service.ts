@@ -8,11 +8,11 @@ import { Account } from 'src/models/Account';
 @Injectable({
   providedIn: 'root',
 })
-export class PowerToFlyService {
+export class FlexJobService {
 
   constructor(private http: HttpClient) { }
 
-  api_link: any = 'http://localhost:54379/api/Powertofly/';
+  api_link: any = 'http://localhost:54379/api/FlexJob/';
 
   getAccounts(): Observable<any>
   {
@@ -29,8 +29,8 @@ export class PowerToFlyService {
     return this.http.post(this.api_link + 'AddAccount', account);
   }
 
-  addParseByJobLinksSignal(coverLetter: string, email: string, jobLinks: string, ignoreAlreadySended: boolean, pageCount: string): Observable<any>
+  addParseByJobLinksSignal(coverLetter: string, email: string, jobLinks: string, ignoreAlreadySended: boolean): Observable<any>
   {
-      return this.http.post(this.api_link + 'ParseByLinks', { coverLetter, AccountEmail: email, jobLinks, ignoreAlreadySended, MaxPageCount: pageCount });
+      return this.http.post(this.api_link + 'ParseByLinks', { coverLetter, AccountEmail: email, jobLinks, ignoreAlreadySended });
   }
 }

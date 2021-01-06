@@ -1,0 +1,29 @@
+<mat-drawer-container class="example-container">
+    <mat-drawer class="account-card" mode="side" opened>
+      <mat-card (click)="chooseAccount(item.Email)" [ngClass]="item.IsSelected ? 'card-selected' : 'card-deselected'" class="card" *ngFor="let item of arrayOfAccount"> 
+          <span> {{item.Email}}</span>
+          <span [ngClass]="item.Status == 'Available' ? 'avialable-status' : 'working-status'" class="status"> {{item.Status}}</span>
+      </mat-card>
+      <button mat-button class="card-button indigo-color" (click)="openDialog()">Add new account</button>
+    </mat-drawer>
+    <mat-drawer-content class="side-content">
+        <div class="text-block">
+          <mat-form-field class="example-full-width field-full">
+            <mat-label>Covver Letter</mat-label>
+            <textarea [(ngModel)]="coverLetter" matInput placeholder="Type text here"></textarea>
+          </mat-form-field>
+        </div>
+        <mat-checkbox class="example-margin" [(ngModel)]="checkBoxIgnore">Do not send CV to same Job (within one account)</mat-checkbox>
+        <div class="text-block">
+          <mat-form-field class="example-full-width field-full">
+            <mat-label id="job-links">Job links</mat-label>
+            <textarea [(ngModel)]="jobLinks" matInput placeholder="Divide links using ;"></textarea>
+          </mat-form-field>
+        </div>
+        <button mat-button class="indigo-color" (click)="startParseByLinks()">Start</button>
+        <div>
+          <span *ngIf="allJobs > 0"> All jobs: {{allJobs}}  </span>
+          <span *ngIf="allJobs > 0"> Passed jobs: {{done}}  </span>
+        </div>
+    </mat-drawer-content>
+  </mat-drawer-container>

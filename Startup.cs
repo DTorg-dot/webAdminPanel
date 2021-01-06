@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.IO;
 using System.Linq;
 using WebAdminPanel.Models;
@@ -25,14 +26,22 @@ namespace WebAdminPanel
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var isDeveleopmnet = Convert.ToBoolean(Configuration["IsDevelopment"]);
+
             services.AddControllersWithViews();
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
 
+            //var connectionString = "Host=localhost;Port=5432;Database=WebAdminPanel;Username=postgres;Password=admin";
+
+            var connectionString = isDeveleopmnet ?
+                "Host=localhost;Port=5432;Database=WebAdminPanel;Username=postgres;Password=admin" :
+                "Host=127.0.0.1;Port=5432;Database=WebAdminPanel;Username=postgres";
+
             services.AddDbContext<DatabaseContext>(options =>
-                options.UseNpgsql("Host=localhost;Port=5432;Database=WebAdminPanel;Username=postgres;Password=admin"));
+                options.UseNpgsql(connectionString));
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -45,12 +54,6 @@ namespace WebAdminPanel
                 options.AddDefaultPolicy(builder =>
                 {
                     builder
-                    //Allow host access from any source
-                    //Todo: the new CORS middleware has blocked allowing any origin, that is, setting allowanyorigin will not take effect
-                    //AllowAnyOrigin()
-                    //Set the domain allowed to access
-                    //Todo: Currently, there are bugs in. Net core 3.1, which can be temporarily solved by setisoriginallowed
-                    //.WithOrigins(Configuration["CorsConfig:Origin"])
                     .SetIsOriginAllowed(t => true)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
@@ -75,6 +78,8 @@ namespace WebAdminPanel
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, DbInitializer initializer, IWebHostEnvironment env)
         {
+            var isDeveleopmnet = Convert.ToBoolean(Configuration["IsDevelopment"]);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -89,7 +94,7 @@ namespace WebAdminPanel
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            if (!env.IsDevelopment())
+            if (!isDeveleopmnet)
             {
                 app.UseSpaStaticFiles();
             }
@@ -114,10 +119,11 @@ namespace WebAdminPanel
             {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,
                 // see https://go.microsoft.com/fwlink/?linkid=864501
-
                 spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
+                //spa.Options.SourcePath = "ClientApp";
+
+                if (isDeveleopmnet)
                 {
                     spa.UseAngularCliServer(npmScript: "start");
                 }

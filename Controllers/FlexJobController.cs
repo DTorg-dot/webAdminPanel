@@ -6,35 +6,34 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebAdminPanel.Models;
 using WebAdminPanel.Models.Enum;
-using WebAdminPanel.Models.PowerToFly;
+using WebAdminPanel.Models.FlexJob;
 
 namespace WebAdminPanel.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    public class PowertoflyController
+    public class FlexJobController
     {
         public DatabaseContext Context { get; set; }
-        public string SiteName { get; set; } = "Powertofly";
+        public string SiteName { get; set; } = "FlexJob";
 
-        public PowertoflyController(DatabaseContext context)
+        public FlexJobController(DatabaseContext context)
         {
             Context = context;
         }
 
         [HttpGet("Accounts")]
-        public async Task<ICollection<AccountPowerToFly>> GetPowerToFlyAccounts()
+        public async Task<ICollection<AccountFlexJob>> GetFlexJobAccounts()
         {
-            List<AccountPowerToFly> accounts = await Context.AccountsPowerToFly.ToListAsync();
+            List<AccountFlexJob> accounts = await Context.AccountsFlexJob.ToListAsync();
 
             return accounts;
         }
 
         [HttpPost("AddAccount")]
-        public async Task AddNewAccount([FromBody]AccountPowerToFlyDto account)
+        public async Task AddNewAccount([FromBody]AccountFlexJob account)
         {
-            AccountPowerToFly accountPowerToFly = new AccountPowerToFly
+            AccountFlexJob accountFlexJob = new AccountFlexJob
             {
                 Email = account.Email,
                 Password = account.Password,
@@ -42,7 +41,7 @@ namespace WebAdminPanel.Controllers
                 Status = Models.Enum.AccountStatus.Available
             };
 
-            Context.AccountsPowerToFly.Add(accountPowerToFly);
+            Context.AccountsFlexJob.Add(accountFlexJob);
 
             await Context.SaveChangesAsync();
         }
@@ -55,7 +54,7 @@ namespace WebAdminPanel.Controllers
                 await RemoveAlreadySentedJob(parseByJobLinkDto);
             }
 
-            var account = await Context.AccountsPowerToFly.FirstAsync(x => x.Email == parseByJobLinkDto.AccountEmail);
+            var account = await Context.AccountsFlexJob.FirstAsync(x => x.Email == parseByJobLinkDto.AccountEmail);
 
             if (account == null)
             {
@@ -69,7 +68,7 @@ namespace WebAdminPanel.Controllers
                 return new BadRequestObjectResult(new string("Site not found"));
             }
 
-            var botSignals = new BotSignalPowerToFly
+            var botSignals = new BotSignalFlexJob
             {
                 Account = account,
                 BotTypeSignal = BotTypeSignal.SendCoverLetterToJobsByLinks,
@@ -77,10 +76,10 @@ namespace WebAdminPanel.Controllers
                 JobLinks = parseByJobLinkDto.JobLinks.Trim(),
                 CoverrLetter = parseByJobLinkDto.CoverLetter,
                 Status = BotSignalStatus.Waiting,
-                MaxPageCount = Convert.ToInt32(parseByJobLinkDto.MaxPageCount)
+                ProfileId = parseByJobLinkDto.ProfileId
             };
 
-            Context.BotSignalsPowerToFly.Add(botSignals);
+            Context.BotSignalFlexJob.Add(botSignals);
             await Context.SaveChangesAsync();
 
             return new OkObjectResult(new { Message = "Bot signal created" });
@@ -96,7 +95,7 @@ namespace WebAdminPanel.Controllers
                 return new BadRequestObjectResult(new string("Site not found"));
             }
 
-            var botSignal = Context.BotSignalsPowerToFly.Include(x => x.Account).FirstOrDefault(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.Waiting);
+            var botSignal = Context.BotSignalFlexJob.Include(x => x.Account).FirstOrDefault(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.Waiting);
             if (botSignal == null)
             {
                 return new BadRequestObjectResult(new string("Bot Signal not found"));
@@ -117,8 +116,7 @@ namespace WebAdminPanel.Controllers
                 Password = account.Password,
                 CoverLetter = botSignal.CoverrLetter,
                 IgnoreAlreadySended = botSignal.IgnoreAlreadySended,
-                JobLinks = botSignal.JobLinks,
-                MaxPageCount = botSignal.MaxPageCount
+                JobLinks = botSignal.JobLinks
             };
 
             return new OkObjectResult(signal);
@@ -134,17 +132,17 @@ namespace WebAdminPanel.Controllers
                 return new BadRequestObjectResult(new string("Site not found"));
             }
 
-            var botSignal = await Context.BotSignalsPowerToFly.Include(x => x.Account).FirstOrDefaultAsync(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.InProgress);
+            var botSignal = await Context.BotSignalFlexJob.Include(x => x.Account).FirstOrDefaultAsync(x => x.Account.SiteId == site.Id && x.Status == BotSignalStatus.InProgress);
             if (botSignal == null)
             {
                 return new BadRequestObjectResult(new string("Bot Signal not found"));
             }
 
-            var doneJobsCount = await Context.JobsPowerToFly.Where(x => x.SignalId == botSignal.Id).CountAsync();
+            var doneJobsCount = await Context.JobsFlexJob.Where(x => x.SignalId == botSignal.Id).CountAsync();
 
             return new OkObjectResult(new Status
             {
-                AllCount = botSignal.MaxPageCount * 10,
+                AllCount = botSignal.JobLinks.Split(';').Where(x => !string.IsNullOrEmpty(x)).Count(),
                 DoneCount = doneJobsCount
             });
         }
@@ -152,15 +150,15 @@ namespace WebAdminPanel.Controllers
         [HttpGet("ChangeStatus")]
         public async Task ChangeAccountStatus([FromQuery]string email, [FromQuery]string status)
         {
-            var account = await Context.AccountsPowerToFly.FirstAsync(x => x.Email == email);
+            var account = await Context.AccountsFlexJob.FirstAsync(x => x.Email == email);
             account.Status = (AccountStatus)Convert.ToInt32(status);
             await Context.SaveChangesAsync();
         }
 
-        [HttpGet("ChangeSignalStatus")]
+        [HttpPost("ChangeSignalStatus")]
         public async Task FinishBotSignalStatus([FromQuery]int botSignalId, [FromQuery] BotSignalStatus status)
         {
-            var botSignal = await Context.BotSignalsPowerToFly.FirstAsync(x => x.Id == botSignalId);
+            var botSignal = await Context.BotSignalFlexJob.FirstAsync(x => x.Id == botSignalId);
             botSignal.Status = status;
             await Context.SaveChangesAsync();
         }
@@ -168,8 +166,9 @@ namespace WebAdminPanel.Controllers
         [HttpPost("SaveJob")]
         public async Task SaveJob([FromBody]JobDto job)
         {
-            Context.JobsPowerToFly.Add(
-                new JobPowerToFly { 
+            Context.JobsFlexJob.Add(
+                new JobFlexJob
+                {
                     Name = job.Name,
                     Link = job.Link,
                     CoverLetter = job.CoverLetter,
@@ -183,7 +182,7 @@ namespace WebAdminPanel.Controllers
         {
             var splitedLinks = parseByJobLinkDto.JobLinks.Split(";").Select(x => x.Trim()).ToList();
 
-            List<string> existedJobs = await Context.BotSignalsPowerToFly
+            List<string> existedJobs = await Context.BotSignalFlexJob
                 .Where(x => x.Account.Email == parseByJobLinkDto.AccountEmail)
                 .Select(x => x.JobLinks.Trim())
                 .ToListAsync();
@@ -201,7 +200,7 @@ namespace WebAdminPanel.Controllers
 
             public bool IgnoreAlreadySended { get; set; }
 
-            public string MaxPageCount { get; set; }
+            public int ProfileId { get; set; }
         }
 
         public class BotSignalDto
@@ -217,11 +216,9 @@ namespace WebAdminPanel.Controllers
             public string CoverLetter { get; set; }
 
             public bool IgnoreAlreadySended { get; set; }
-
-            public int MaxPageCount { get; set; }
         }
 
-        public class AccountPowerToFlyDto
+        public class AccountJobFlexDto
         {
             public string Email { get; set; }
 
@@ -247,6 +244,5 @@ namespace WebAdminPanel.Controllers
 
             public int AllCount { get; set; }
         }
-
     }
 }

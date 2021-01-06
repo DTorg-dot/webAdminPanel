@@ -33,5 +33,7 @@ namespace WebAdminPanel.Models
         public bool IgnoreAlreadySended { get; set; }
 
         public BotSignalStatus Status { get; set; }
+
+        public int MaxPageCount { get; set; }
     }
 }

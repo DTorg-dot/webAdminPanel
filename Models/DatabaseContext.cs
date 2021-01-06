@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAdminPanel.Models.Base;
+using WebAdminPanel.Models.FlexJob;
 using WebAdminPanel.Models.PowerToFly;
 
 namespace WebAdminPanel.Models
@@ -31,6 +32,16 @@ namespace WebAdminPanel.Models
         public DbSet<SitePowerToFly> SitePowerToFly { get; set; }
 
         public DbSet<BotSignalPowerToFly> BotSignalsPowerToFly { get; set; }
+        #endregion
+
+        #region FlexJob
+        public DbSet<AccountFlexJob> AccountsFlexJob { get; set; }
+
+        public DbSet<JobFlexJob> JobsFlexJob { get; set; }
+
+        public DbSet<SiteFlexJob> SiteFlexJob { get; set; }
+
+        public DbSet<BotSignalFlexJob> BotSignalFlexJob { get; set; }
         #endregion
     }
 }

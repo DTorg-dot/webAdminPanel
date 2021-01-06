@@ -34,6 +34,13 @@ namespace WebAdminPanel.Models
                 Context.SitePowerToFly.Add(new Models.PowerToFly.SitePowerToFly { Name = "Powertofly" });
             }
 
+            isSiteExist = Context.SitePowerToFly.Any(x => x.Name == "FlexJob");
+
+            if (!isSiteExist)
+            {
+                Context.SiteFlexJob.Add(new Models.FlexJob.SiteFlexJob { Name = "FlexJob" });
+            }
+
             await Context.SaveChangesAsync();
         }
 

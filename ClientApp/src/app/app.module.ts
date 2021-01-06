@@ -1,6 +1,8 @@
+import { FlexJobService } from './services/flexjob.service';
 import { PowerToFlyService } from './services/power-to-fly.service';
 import { AccountPowerToFly } from './modelsForService/AccountPowerToFly';
 import { AccountStatus } from './modelsForService/AccountPowerToFly';
+import { PowerToFlyTabComponent } from './power-to-fly-tab/power-to-fly-tab.component'
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common'; 
 import { NgModule } from '@angular/core';
@@ -19,11 +21,14 @@ import { AppComponent } from './app.component';
 import { AddNewAccountDialogComponent } from './add-new-account-dialog/add-new-account-dialog.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { FlexJobTabComponent } from './flex-job-tab/flex-job-tab.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AddNewAccountDialogComponent
+    AddNewAccountDialogComponent,
+    PowerToFlyTabComponent,
+    FlexJobTabComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
