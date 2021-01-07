@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +20,13 @@ namespace WebAdminPanel.Models
 
             if (!isDbFresh)
             {
+                Context.Database.Migrate();
                 await SeedData();
             }
         }
 
         private async Task SeedData()
         {
-            Context.Database.EnsureCreated();
-
             var isSiteExist = Context.SitePowerToFly.Any(x => x.Name == "Powertofly");
 
             if (!isSiteExist)

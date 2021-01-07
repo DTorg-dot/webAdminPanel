@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Linq;
+using WebAdminPanel.Helper;
 using WebAdminPanel.Models;
 
 namespace WebAdminPanel
@@ -63,6 +64,9 @@ namespace WebAdminPanel
 
             // Seed data to DB 
             services.AddScoped<DbInitializer>();
+
+            // Add logger
+            services.AddSingleton<LogSingletonService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -119,7 +123,7 @@ namespace WebAdminPanel
             {
                 // To learn more about options for serving an Angular SPA from ASP.NET Core,
                 // see https://go.microsoft.com/fwlink/?linkid=864501
-                spa.Options.SourcePath = "ClientApp";
+                spa.Options.SourcePath = "ClientApp/dist";
 
                 //spa.Options.SourcePath = "ClientApp";
 

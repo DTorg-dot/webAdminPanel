@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAdminPanel.Helper;
 using WebAdminPanel.Models;
 using WebAdminPanel.Models.Enum;
 using WebAdminPanel.Models.PowerToFly;
@@ -17,10 +18,12 @@ namespace WebAdminPanel.Controllers
     {
         public DatabaseContext Context { get; set; }
         public string SiteName { get; set; } = "Powertofly";
+        public LogSingletonService LogSingletonService { get; set; }
 
-        public PowertoflyController(DatabaseContext context)
+        public PowertoflyController(DatabaseContext context, LogSingletonService logSingletonService)
         {
             Context = context;
+            LogSingletonService = logSingletonService;
         }
 
         [HttpGet("Accounts")]
@@ -179,6 +182,20 @@ namespace WebAdminPanel.Controllers
             await Context.SaveChangesAsync();
         }
 
+        [HttpPost("AddLog")]
+        public async Task AddLog([FromBody] LogMessage Message)
+        {
+            await Task.Run(() => LogSingletonService.AddToStorage(Message.Message));
+        }
+
+        [HttpGet("GetLog")]
+        public async Task<IActionResult> GetLog()
+        {
+            var result = await Task.Run(() => LogSingletonService.GetFromStorage());
+
+            return new OkObjectResult(result);
+        }
+
         private async Task RemoveAlreadySentedJob(ParseByJobLinkDto parseByJobLinkDto)
         {
             var splitedLinks = parseByJobLinkDto.JobLinks.Split(";").Select(x => x.Trim()).ToList();
@@ -189,6 +206,11 @@ namespace WebAdminPanel.Controllers
                 .ToListAsync();
 
             parseByJobLinkDto.JobLinks = string.Join(";", splitedLinks.Where(x => !existedJobs.Contains(x.Trim())));
+        }
+
+        public class LogMessage
+        {
+            public string Message { get; set; }
         }
 
         public class ParseByJobLinkDto

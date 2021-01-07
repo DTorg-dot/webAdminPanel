@@ -55,3 +55,15 @@
 .mat-form-field {
     width: 75%;
 }
+
+.log-block {
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.log-span {
+    font-size: 12px;
+    display: block;
+    overflow: auto;
+    max-height: 300px;
+}

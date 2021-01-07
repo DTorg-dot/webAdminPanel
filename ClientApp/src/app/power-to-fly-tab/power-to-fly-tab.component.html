@@ -31,5 +31,8 @@
           <span *ngIf="allJobsPowerToFly > 0"> All jobs: {{allJobsPowerToFly}}  </span>
           <span *ngIf="allJobsPowerToFly > 0"> Passed jobs: {{donePowertofly}}  </span>
         </div>
+        <div class="log-block">
+          <span class="log-span" [innerText]="log"></span>
+        </div>
     </mat-drawer-content>
   </mat-drawer-container>

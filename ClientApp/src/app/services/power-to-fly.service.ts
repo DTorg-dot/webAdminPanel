@@ -33,4 +33,9 @@ export class PowerToFlyService {
   {
       return this.http.post(this.api_link + 'ParseByLinks', { coverLetter, AccountEmail: email, jobLinks, ignoreAlreadySended, MaxPageCount: pageCount });
   }
+
+  getLog(): Observable<any>
+  {
+    return this.http.get<any>(this.api_link + 'GetLog');
+  }
 }

@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Account } from 'src/models/Account';
@@ -22,6 +23,7 @@ export class PowerToFlyTabComponent implements OnInit {
   donePowertofly: any;
   allJobsPowerToFly: any;
   pageCount: any;
+  log: string = '';
 
   constructor(public dialog: MatDialog, public powertToFlyService: PowerToFlyService, private _snackBar: MatSnackBar) { }
 
@@ -38,6 +40,17 @@ export class PowerToFlyTabComponent implements OnInit {
           this.allJobsPowerToFly = result['allCount'];
           this.donePowertofly = result['doneCount'];
         });
+
+        setInterval( () => {
+          if (this.log.length > 5000)
+          {
+            this.log = '';
+          }
+          this.powertToFlyService.getLog().subscribe(result => 
+            { 
+              result.map(x => this.log += '\n' + x);
+            });
+       }, 2000);
   }
 
   openDialog(): void {
