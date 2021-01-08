@@ -80,7 +80,8 @@ namespace WebAdminPanel.Controllers
                 JobLinks = parseByJobLinkDto.JobLinks.Trim(),
                 CoverrLetter = parseByJobLinkDto.CoverLetter,
                 Status = BotSignalStatus.Waiting,
-                MaxPageCount = Convert.ToInt32(parseByJobLinkDto.MaxPageCount)
+                MaxPageCount = Convert.ToInt32(parseByJobLinkDto.MaxPageCount),
+                UpdateAt = DateTime.Now
             };
 
             Context.BotSignalsPowerToFly.Add(botSignals);
@@ -125,6 +126,85 @@ namespace WebAdminPanel.Controllers
             };
 
             return new OkObjectResult(signal);
+        }
+
+        [HttpGet("BotSignals")]
+        public async Task<IActionResult> GetBotSignals([FromQuery] int accountId, [FromQuery] int count = 5)
+        {
+            var site = Context.Sites.First(x => x.Name == SiteName);
+
+            if (site == null)
+            {
+                return new BadRequestObjectResult(new string("Site not found"));
+            }
+
+            var botSignals = await Context.BotSignalsPowerToFly
+                .Where(x => x.Account.SiteId == site.Id && x.AccountId == accountId)
+                .Take(count)
+                .ToListAsync();
+
+            var botSignalDtos = botSignals.Select(x => new BotSignalViewDto
+            {
+                Id = x.Id,
+                JobLink = x.JobLinks,
+                AllJobCount = x.AllJobCount,
+                UpdatedAt = x.UpdateAt.ToString(),
+                Status = x.Status
+            }).ToList();
+
+            foreach (var item in botSignalDtos)
+            {
+                item.SendedJobCount = await Context.JobsPowerToFly.CountAsync(x => x.SignalId == item.Id);
+            }
+
+            return new OkObjectResult(botSignalDtos);
+        }
+
+        [HttpGet("SingleBotSignal")]
+        public async Task<IActionResult> GetSingleBotSignal([FromQuery] int signalId)
+        {
+            var site = Context.Sites.First(x => x.Name == SiteName);
+
+            if (site == null)
+            {
+                return new BadRequestObjectResult(new string("Site not found"));
+            }
+
+            var botSignal = await Context.BotSignalsPowerToFly.FirstOrDefaultAsync();
+
+            if (botSignal == null)
+            {
+                return new BadRequestObjectResult(new string("BotSignal not found"));
+            }
+
+            var botSignalDtos = new BotSignalViewDto
+            {
+                Id = botSignal.Id,
+                JobLink = botSignal.JobLinks,
+                AllJobCount = botSignal.AllJobCount,
+                UpdatedAt = botSignal.UpdateAt.ToString(),
+                Status = botSignal.Status
+            };
+
+            botSignalDtos.SendedJobCount = await Context.JobsPowerToFly.CountAsync(x => x.SignalId == botSignal.Id);
+
+            return new OkObjectResult(botSignalDtos);
+        }
+
+        [HttpPost("UpdateBotSignalAllJobCount")]
+        public async Task UpdateBotSignal([FromQuery] int botSignalId, [FromQuery] int addToAllJobCount)
+        {
+            var botSignal = await Context.BotSignalsPowerToFly
+                .FirstOrDefaultAsync(x => x.Id == botSignalId);
+
+            if (botSignal == null)
+            {
+                return;
+            }
+
+            botSignal.AllJobCount += addToAllJobCount;
+
+            await Context.SaveChangesAsync();
         }
 
         [HttpGet("Status")]
@@ -241,6 +321,23 @@ namespace WebAdminPanel.Controllers
             public bool IgnoreAlreadySended { get; set; }
 
             public int MaxPageCount { get; set; }
+        }
+
+        public class BotSignalViewDto
+        {
+            public int Id { get; set; }
+
+            public string Email { get; set; }
+
+            public string JobLink { get; set; }
+
+            public int SendedJobCount { get; set; }
+
+            public int AllJobCount { get; set; }
+
+            public string UpdatedAt { get; set; }
+
+            public BotSignalStatus Status { get; set; }
         }
 
         public class AccountPowerToFlyDto

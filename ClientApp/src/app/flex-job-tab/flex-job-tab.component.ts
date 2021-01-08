@@ -30,7 +30,7 @@ export class FlexJobTabComponent implements OnInit {
       { 
         result.map(x =>  {
           let status = this.getStatusEnumValue(x['status']);
-          this.arrayOfAccount.push(new Account(x['email'], x['password'], false, status))
+          this.arrayOfAccount.push(new Account(x['id'], x['email'], x['password'], false, status))
         });
       });
       this.flexJobService.getStatus().subscribe(result => 
@@ -50,8 +50,13 @@ export class FlexJobTabComponent implements OnInit {
       const accountForSave: AccountPowerToFly = { Email: result.login,  Password: result.password, Status: 1, Id: 1, SiteId: 1};
       this.flexJobService.addAccount(accountForSave).subscribe(x =>
         { 
-          let status = this.getStatusEnumValue(1);
-          this.arrayOfAccount.push({ Email: result.login, Password: result.password,  IsSelected: false, Status: status})
+          this.flexJobService.getAccounts().subscribe(result => 
+            { 
+              result.map(x =>  {
+                let status = this.getStatusEnumValue(x['status']);
+                this.arrayOfAccount.push(new Account(x['id'], x['email'], x['password'], false, status))
+              });
+            });
         })
       // TODO: Need to call server and save acc
     });

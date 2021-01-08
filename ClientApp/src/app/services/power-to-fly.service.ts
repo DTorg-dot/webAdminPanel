@@ -19,6 +19,16 @@ export class PowerToFlyService {
      return this.http.get<any>(this.api_link + 'Accounts');
   }
 
+  getBotSinglsByAccountId(accountId: number, count: number): Observable<any>
+  {
+     return this.http.get<any>(this.api_link + 'BotSignals?accountId=' + accountId + '&count=' + count);
+  }
+
+  getSingleBotSignal(signalId: number): Observable<any>
+  {
+     return this.http.get<any>(this.api_link + 'SingleBotSignal?signalId=' + signalId);
+  }
+
   getStatus(): Observable<any>
   {
      return this.http.get<any>(this.api_link + 'Status');

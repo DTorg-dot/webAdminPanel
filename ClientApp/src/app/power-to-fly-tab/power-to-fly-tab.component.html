@@ -7,6 +7,7 @@
       <button mat-button class="card-button indigo-color" (click)="openDialog()">Add new account</button>
     </mat-drawer>
     <mat-drawer-content class="side-content">
+      <span>
         <div class="text-block">
           <mat-form-field class="example-full-width field-full">
             <mat-label>Covver Letter</mat-label>
@@ -34,5 +35,26 @@
         <div class="log-block">
           <span class="log-span" [innerText]="log"></span>
         </div>
+      </span>
+      <span>
+        <div *ngIf="selectedBotSignal">
+          <span>Bot signal</span>
+          <div>Date: {{selectedBotSignal.Date}}</div>
+          <div>Link:</div>
+          <span style="overflow: auto; width: 75%; display: inline-block;">{{selectedBotSignal.JobLink}}</span>
+          <div>All job: {{selectedBotSignal.FoundJob}}</div>
+          <div>Accessible job: {{selectedBotSignal.SendedJob}}</div>
+          <div>Sended CV job: {{selectedBotSignal.SendedJob}}</div>
+          <div>Status: {{selectedBotSignal.Status}}</div>
+        </div>
+      </span>
     </mat-drawer-content>
+    <mat-drawer class="account-card" mode="side" opened position="end"> 
+      <mat-card (click)="chooseBotSignal(item.Id)" [ngClass]="item.IsSelected ? 'card-selected' : 'card-deselected'" class="card" *ngFor="let item of arrayOfBotSignals"> 
+          <span> {{item.Date}}</span>
+          <span 
+          [ngClass]="renderStatusColor(item.Status)" 
+          class="status"> {{item.Status}}</span>
+      </mat-card>
+    </mat-drawer>
   </mat-drawer-container>
